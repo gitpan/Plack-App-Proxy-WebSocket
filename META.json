@@ -30,8 +30,9 @@
          "requires" : {
             "AnyEvent::Handle" : "0",
             "AnyEvent::Socket" : "0",
+            "HTTP::Headers" : "0",
+            "HTTP::Parser::XS" : "0",
             "HTTP::Request" : "0",
-            "HTTP::Response" : "0",
             "Plack::App::Proxy" : "0",
             "Plack::Request" : "0",
             "URI" : "0",
@@ -51,12 +52,13 @@
       "bugtracker" : {
          "web" : "https://github.com/chazmcgarvey/p5-Plack-App-Proxy-WebSocket/issues"
       },
+      "homepage" : "http://search.cpan.org/~ccm/Plack-App-Proxy-WebSocket",
       "repository" : {
          "type" : "git",
          "url" : "git://github.com/chazmcgarvey/p5-Plack-App-Proxy-WebSocket.git",
          "web" : "https://github.com/chazmcgarvey/p5-Plack-App-Proxy-WebSocket"
       }
    },
-   "version" : "0.01"
+   "version" : "0.02"
 }
 

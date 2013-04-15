@@ -22,8 +22,9 @@ my %WriteMakefileArgs = (
   "PREREQ_PM" => {
     "AnyEvent::Handle" => 0,
     "AnyEvent::Socket" => 0,
+    "HTTP::Headers" => 0,
+    "HTTP::Parser::XS" => 0,
     "HTTP::Request" => 0,
-    "HTTP::Response" => 0,
     "Plack::App::Proxy" => 0,
     "Plack::Request" => 0,
     "URI" => 0,
@@ -34,7 +35,7 @@ my %WriteMakefileArgs = (
   "TEST_REQUIRES" => {
     "Test::More" => 0
   },
-  "VERSION" => "0.01",
+  "VERSION" => "0.02",
   "test" => {
     "TESTS" => "t/*.t"
   }

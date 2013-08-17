@@ -1,6 +1,6 @@
 package Plack::App::Proxy::WebSocket;
 {
-  $Plack::App::Proxy::WebSocket::VERSION = '0.02';
+  $Plack::App::Proxy::WebSocket::VERSION = '0.03';
 }
 # ABSTRACT: proxy HTTP and WebSocket connections
 
@@ -11,7 +11,7 @@ use AnyEvent::Handle;
 use AnyEvent::Socket;
 use HTTP::Headers;
 use HTTP::Request;
-use HTTP::Parser::XS qw/parse_http_response HEADERS_AS_ARRAYREF/;
+use HTTP::Parser::XS qw/parse_http_response HEADERS_AS_HASHREF/;
 use Plack::Request;
 use URI;
 
@@ -79,11 +79,11 @@ sub call {
                 $buffer .= $buf;
 
                 my ($ret, $http_version, $status, $message, $headers) =
-                    parse_http_response($buffer, HEADERS_AS_ARRAYREF);
+                    parse_http_response($buffer, HEADERS_AS_HASHREF);
                 $server->push_shutdown if $ret == -2;
                 return if $ret < 0;
 
-                $headers = [$self->response_headers($headers)] unless $status == 101;
+                $headers = [$self->response_headers(HTTP::Headers->new(%$headers))] unless $status == 101;
                 $writer = $res->([$status, $headers]);
                 $writer->write(substr($buffer, $ret));
                 $buffer = undef;
@@ -143,7 +143,7 @@ Plack::App::Proxy::WebSocket - proxy HTTP and WebSocket connections
 
 =head1 VERSION
 
-version 0.02
+version 0.03
 
 =head1 SYNOPSIS
 
@@ -159,22 +159,24 @@ version 0.02
 
 =head1 DESCRIPTION
 
-This is a subclass of L<Plack::App::Proxy> that adds support for proxying
-WebSocket connections.  It works by looking for the C<Upgrade> header,
-forwarding the handshake to the remote back-end, and then buffering
-full-duplex between the client and the remote.  Regular HTTP requests are
-handled by L<Plack::App::Proxy> as usual, though there are a few differences
-related to the generation of headers for the back-end request; see
-L</build_headers_from_env> for details.
+This is a subclass of L<Plack::App::Proxy> that adds support for transparent
+(i.e. reverse) proxying WebSocket connections.  If your proxy is a forward
+proxy that is to be explicitly configured in the system or browser, you may be
+able to use L<Plack::Middleware::Proxy::Connect> instead.
+
+This module works by looking for the C<Upgrade: WebSocket> header, completing
+the handshake with the remote, and then buffering full-duplex between the
+client and the remote.  Regular requests are handled by L<Plack::App::Proxy>
+as usual, though there are a few differences related to the generation of
+headers for the back-end request; see L</build_headers_from_env> for details.
 
 This module has no configuration options beyond what L<Plack::App::Proxy>
 requires or provides, so it may be an easy drop-in replacement.  Read the
-documentation of that module for advanced usage not covered here.  Also note
-that extra L<PSGI> server features are required in order for the WebSocket
-proxying to work.  The server must support C<psgi.streaming> and C<psgix.io>.
-It is also highly recommended that you choose a C<psgi.nonblocking> server,
-though that isn't strictly required.  L<Twiggy> is one good choice for this
-application.
+documentation of that module for advanced usage not covered here.  Also, you
+must use a L<PSGI> server that supports C<psgi.streaming> and C<psgix.io>.
+For performance reasons, you should also use a C<psgi.nonblocking> server
+(like L<Twiggy>) and the L<Plack::App::Proxy::Backend::AnyEvent::HTTP> user
+agent back-end (which is the default, so no extra configuration is needed).
 
 This module is B<EXPERIMENTAL>.  I use it in development and it works
 swimmingly for me, but it is completely untested in production scenarios.
